@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dao.ShujiyuyueDao">
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        a.id as id
+        ,a.jiaoshi_id as jiaoshiId
+        ,a.yonghu_id as yonghuId
+        ,a.laoshi_id as laoshiId
+        ,a.shujiyuyue_text as shujiyuyueText
+        ,a.shujiyuyue_yesno_types as shujiyuyueYesnoTypes
+        ,a.shujiyuyue_yesno_text as shujiyuyueYesnoText
+        ,a.shujiyuyue_time as shujiyuyueTime
+        ,a.insert_time as insertTime
+        ,a.create_time as createTime
+    </sql>
+    <select id="selectListView" parameterType="map" resultType="com.entity.view.ShujiyuyueView" >
+        SELECT
+        <include refid="Base_Column_List" />
+
+--         级联表的字段
+        ,jiaoshi.jiaoshi_uuid_number as jiaoshiUuidNumber
+        ,jiaoshi.jiaoshi_name as jiaoshiName
+        ,jiaoshi.jiaoshi_types as jiaoshiTypes
+        ,jiaoshi.jiaoshi_status_types as jiaoshiStatusTypes
+        ,jiaoshi.jiaoshi_photo as jiaoshiPhoto
+        ,jiaoshi.jiaoshi_address as jiaoshiAddress
+        ,jiaoshi.jiaoshi_rongnaliang as jiaoshiRongnaliang
+        ,jiaoshi.jiaoshi_content as jiaoshiContent
+        ,laoshi.laoshi_name as laoshiName
+        ,laoshi.laoshi_photo as laoshiPhoto
+        ,laoshi.laoshi_phone as laoshiPhone
+        ,laoshi.laoshi_email as laoshiEmail
+        ,laoshi.laoshi_delete as laoshiDelete
+        ,yonghu.yonghu_name as yonghuName
+        ,yonghu.yonghu_photo as yonghuPhoto
+        ,yonghu.yonghu_phone as yonghuPhone
+        ,yonghu.yonghu_id_number as yonghuIdNumber
+        ,yonghu.yonghu_email as yonghuEmail
+        ,yonghu.yonghu_delete as yonghuDelete
+
+        FROM shujiyuyue  a
+        left JOIN jiaoshi jiaoshi ON a.jiaoshi_id = jiaoshi.id
+        left JOIN laoshi laoshi ON a.laoshi_id = laoshi.id
+        left JOIN yonghu yonghu ON a.yonghu_id = yonghu.id
+
+        <where>
+            <if test="params.ids != null">
+                and a.id in
+                <foreach item="item" index="index" collection="params.ids" open="(" separator="," close=")">
+                #{item}
+                </foreach>
+            </if>
+            <if test="params.jiaoshiId != null and params.jiaoshiId != ''">
+                and (
+                    a.jiaoshi_id = #{params.jiaoshiId}
+                )
+            </if>
+            <if test="params.yonghuId != null and params.yonghuId != ''">
+                and (
+                    a.yonghu_id = #{params.yonghuId}
+                )
+            </if>
+            <if test="params.laoshiId != null and params.laoshiId != ''">
+                and (
+                    a.laoshi_id = #{params.laoshiId}
+                )
+            </if>
+            <if test=" params.shujiyuyueText != '' and params.shujiyuyueText != null and params.shujiyuyueText != 'null' ">
+                and a.shujiyuyue_text like CONCAT('%',#{params.shujiyuyueText},'%')
+            </if>
+            <if test="params.shujiyuyueYesnoTypes != null and params.shujiyuyueYesnoTypes != ''">
+                and a.shujiyuyue_yesno_types = #{params.shujiyuyueYesnoTypes}
+            </if>
+            <if test=" params.shujiyuyueYesnoText != '' and params.shujiyuyueYesnoText != null and params.shujiyuyueYesnoText != 'null' ">
+                and a.shujiyuyue_yesno_text like CONCAT('%',#{params.shujiyuyueYesnoText},'%')
+            </if>
+            <if test=" params.shujiyuyueTimeStart != '' and params.shujiyuyueTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.shujiyuyue_time) >= UNIX_TIMESTAMP(#{params.shujiyuyueTimeStart}) ]]>
+            </if>
+            <if test=" params.shujiyuyueTimeEnd != '' and params.shujiyuyueTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.shujiyuyue_time) <= UNIX_TIMESTAMP(#{params.shujiyuyueTimeEnd}) ]]>
+            </if>
+            <if test=" params.insertTimeStart != '' and params.insertTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) >= UNIX_TIMESTAMP(#{params.insertTimeStart}) ]]>
+            </if>
+            <if test=" params.insertTimeEnd != '' and params.insertTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) <= UNIX_TIMESTAMP(#{params.insertTimeEnd}) ]]>
+            </if>
+
+                <!-- 判断教室信息的id不为空 -->
+            <if test=" params.jiaoshiIdNotNull != '' and params.jiaoshiIdNotNull != null and params.jiaoshiIdNotNull != 'null' ">
+                and a.jiaoshi_id IS NOT NULL
+            </if>
+            <if test=" params.jiaoshiUuidNumber != '' and params.jiaoshiUuidNumber != null and params.jiaoshiUuidNumber != 'null' ">
+                and jiaoshi.jiaoshi_uuid_number like CONCAT('%',#{params.jiaoshiUuidNumber},'%')
+            </if>
+            <if test=" params.jiaoshiName != '' and params.jiaoshiName != null and params.jiaoshiName != 'null' ">
+                and jiaoshi.jiaoshi_name like CONCAT('%',#{params.jiaoshiName},'%')
+            </if>
+            <if test="params.jiaoshiTypes != null  and params.jiaoshiTypes != ''">
+                and jiaoshi.jiaoshi_types = #{params.jiaoshiTypes}
+            </if>
+
+            <if test="params.jiaoshiStatusTypes != null  and params.jiaoshiStatusTypes != ''">
+                and jiaoshi.jiaoshi_status_types = #{params.jiaoshiStatusTypes}
+            </if>
+
+            <if test="params.jiaoshiAddressStart != null  and params.jiaoshiAddressStart != '' ">
+                <![CDATA[  and jiaoshi.jiaoshi_address >= #{params.jiaoshiAddressStart}   ]]>
+            </if>
+            <if test="params.jiaoshiAddressEnd != null  and params.jiaoshiAddressEnd != '' ">
+                <![CDATA[  and jiaoshi.jiaoshi_address <= #{params.jiaoshiAddressEnd}   ]]>
+            </if>
+            <if test="params.jiaoshiAddress != null  and params.jiaoshiAddress != '' ">
+                and jiaoshi.jiaoshi_address = #{params.jiaoshiAddress}
+            </if>
+            <if test="params.jiaoshiRongnaliangStart != null  and params.jiaoshiRongnaliangStart != '' ">
+                <![CDATA[  and jiaoshi.jiaoshi_rongnaliang >= #{params.jiaoshiRongnaliangStart}   ]]>
+            </if>
+            <if test="params.jiaoshiRongnaliangEnd != null  and params.jiaoshiRongnaliangEnd != '' ">
+                <![CDATA[  and jiaoshi.jiaoshi_rongnaliang <= #{params.jiaoshiRongnaliangEnd}   ]]>
+            </if>
+            <if test="params.jiaoshiRongnaliang != null  and params.jiaoshiRongnaliang != '' ">
+                and jiaoshi.jiaoshi_rongnaliang = #{params.jiaoshiRongnaliang}
+            </if>
+            <if test=" params.jiaoshiContent != '' and params.jiaoshiContent != null and params.jiaoshiContent != 'null' ">
+                and jiaoshi.jiaoshi_content like CONCAT('%',#{params.jiaoshiContent},'%')
+            </if>
+            <if test=" params.insertTimeStart != '' and params.insertTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(jiaoshi.insert_time) >= UNIX_TIMESTAMP(#{params.insertTimeStart}) ]]>
+            </if>
+            <if test=" params.insertTimeEnd != '' and params.insertTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(jiaoshi.insert_time) <= UNIX_TIMESTAMP(#{params.insertTimeEnd}) ]]>
+            </if>
+                <!-- 判断教师的id不为空 -->
+            <if test=" params.laoshiIdNotNull != '' and params.laoshiIdNotNull != null and params.laoshiIdNotNull != 'null' ">
+                and a.laoshi_id IS NOT NULL
+            </if>
+            <if test=" params.laoshiName != '' and params.laoshiName != null and params.laoshiName != 'null' ">
+                and laoshi.laoshi_name like CONCAT('%',#{params.laoshiName},'%')
+            </if>
+            <if test=" params.laoshiPhone != '' and params.laoshiPhone != null and params.laoshiPhone != 'null' ">
+                and laoshi.laoshi_phone like CONCAT('%',#{params.laoshiPhone},'%')
+            </if>
+            <if test=" params.laoshiEmail != '' and params.laoshiEmail != null and params.laoshiEmail != 'null' ">
+                and laoshi.laoshi_email like CONCAT('%',#{params.laoshiEmail},'%')
+            </if>
+            <if test="params.laoshiDeleteStart != null  and params.laoshiDeleteStart != '' ">
+                <![CDATA[  and laoshi.laoshi_delete >= #{params.laoshiDeleteStart}   ]]>
+            </if>
+            <if test="params.laoshiDeleteEnd != null  and params.laoshiDeleteEnd != '' ">
+                <![CDATA[  and laoshi.laoshi_delete <= #{params.laoshiDeleteEnd}   ]]>
+            </if>
+            <if test="params.laoshiDelete != null  and params.laoshiDelete != '' ">
+                and laoshi.laoshi_delete = #{params.laoshiDelete}
+            </if>
+                <!-- 判断用户的id不为空 -->
+            <if test=" params.yonghuIdNotNull != '' and params.yonghuIdNotNull != null and params.yonghuIdNotNull != 'null' ">
+                and a.yonghu_id IS NOT NULL
+            </if>
+            <if test=" params.yonghuName != '' and params.yonghuName != null and params.yonghuName != 'null' ">
+                and yonghu.yonghu_name like CONCAT('%',#{params.yonghuName},'%')
+            </if>
+            <if test=" params.yonghuPhone != '' and params.yonghuPhone != null and params.yonghuPhone != 'null' ">
+                and yonghu.yonghu_phone like CONCAT('%',#{params.yonghuPhone},'%')
+            </if>
+            <if test=" params.yonghuIdNumber != '' and params.yonghuIdNumber != null and params.yonghuIdNumber != 'null' ">
+                and yonghu.yonghu_id_number like CONCAT('%',#{params.yonghuIdNumber},'%')
+            </if>
+            <if test=" params.yonghuEmail != '' and params.yonghuEmail != null and params.yonghuEmail != 'null' ">
+                and yonghu.yonghu_email like CONCAT('%',#{params.yonghuEmail},'%')
+            </if>
+            <if test="params.yonghuDeleteStart != null  and params.yonghuDeleteStart != '' ">
+                <![CDATA[  and yonghu.yonghu_delete >= #{params.yonghuDeleteStart}   ]]>
+            </if>
+            <if test="params.yonghuDeleteEnd != null  and params.yonghuDeleteEnd != '' ">
+                <![CDATA[  and yonghu.yonghu_delete <= #{params.yonghuDeleteEnd}   ]]>
+            </if>
+            <if test="params.yonghuDelete != null  and params.yonghuDelete != '' ">
+                and yonghu.yonghu_delete = #{params.yonghuDelete}
+            </if>
+        </where>
+
+        order by a.${params.orderBy} desc 
+    </select>
+
+</mapper>
